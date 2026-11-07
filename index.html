@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meu Financeiro UNIP - ADS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-zinc-950 text-white min-h-screen p-4">
+  <div class="max-w-4xl mx-auto">
+    <header class="py-8">
+      <h1 class="text-3xl font-bold">Meu Financeiro UNIP 💰</h1>
+      <p class="text-zinc-400">ADS - UNIP Anchieta | JS puro</p>
+    </header>
+    <div class="grid md:grid-cols-3 gap-4 mb-6">
+      <div class="bg-zinc-900 p-5 rounded-2xl border border-zinc-800">
+        <label class="text-xs text-zinc-400">SALÁRIO GRÁFICA</label>
+        <input id="salario" type="number" value="2000" class="w-full bg-zinc-800 mt-2 p-3 rounded-xl text-xl font-bold">
+      </div>
+      <div class="bg-zinc-900 p-5 rounded-2xl border border-zinc-800">
+        <label class="text-xs text-zinc-400">MENSALIDADE UNIP (50%)</label>
+        <input id="mensalidade" type="number" value="260" class="w-full bg-zinc-800 mt-2 p-3 rounded-xl text-xl font-bold">
+      </div>
+      <div class="bg-zinc-900 p-5 rounded-2xl border border-zinc-800">
+        <label class="text-xs text-zinc-400">JÁ GUARDADO</label>
+        <input id="guardado" type="number" value="800" class="w-full bg-zinc-800 mt-2 p-3 rounded-xl text-xl font-bold">
+      </div>
+    </div>
+    <div class="grid md:grid-cols-3 gap-4 mb-6">
+      <div class="bg-yellow-500 text-black p-5 rounded-2xl">
+        <p class="text-sm font-bold">SOBRA POR MÊS</p>
+        <p id="sobra" class="text-3xl font-black mt-2">R$ 1.740</p>
+      </div>
+      <div class="bg-white text-black p-5 rounded-2xl">
+        <p class="text-sm font-bold">MESES PAGOS</p>
+        <p id="meses" class="text-3xl font-black mt-2">3,0 meses</p>
+      </div>
+      <div class="bg-zinc-900 p-5 rounded-2xl border border-zinc-800">
+        <p class="text-xs text-zinc-400">PROGRESSO (30 meses)</p>
+        <div class="w-full bg-zinc-800 h-3 rounded-full mt-3"><div id="barra" class="bg-yellow-500 h-3 rounded-full" style="width:10%"></div></div>
+        <p id="progresso" class="text-sm mt-2">10% completo</p>
+      </div>
+    </div>
+    <div class="bg-zinc-900 p-6 rounded-2xl border border-zinc-800">
+      <h3 class="font-bold mb-4">Onde vai meu salário</h3>
+      <canvas id="chart"></canvas>
+    </div>
+  </div>
+<script>
+let myChart;
+function calc(){
+  const salario = parseFloat(document.getElementById('salario').value) || 0;
+  const mensalidade = parseFloat(document.getElementById('mensalidade').value) || 0;
+  const guardado = parseFloat(document.getElementById('guardado').value) || 0;
+  const sobra = salario - mensalidade;
+  const meses = guardado / mensalidade || 0;
+  const progresso = Math.min((meses / 30) * 100, 100);
+  document.getElementById('sobra').innerText = `R$ ${sobra.toLocaleString('pt-BR')}`;
+  document.getElementById('meses').innerText = `${meses.toFixed(1)} meses`;
+  document.getElementById('barra').style.width = progresso + '%';
+  document.getElementById('progresso').innerText = `${progresso.toFixed(1)}% completo`;
+  localStorage.setItem('fin_unip', JSON.stringify({salario, mensalidade, guardado}));
+  const ctx = document.getElementById('chart');
+  if(myChart) myChart.destroy();
+  myChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['UNIP','Sobra'],
+      datasets: [{ data: [mensalidade, sobra > 0 ? sobra : 0], backgroundColor: ['#eab308','#27272a'], borderWidth: 0 }]
+    },
+    options: { plugins: { legend: { labels: { color: 'white' } } } }
+  });
+}
+['salario','mensalidade','guardado'].forEach(id => document.getElementById(id).addEventListener('input', calc));
+calc();
+</script>
+</body>
+</html>
